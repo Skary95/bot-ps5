@@ -1,0 +1,63 @@
+# Liste des pages à surveiller.
+#
+#   name      nom affiché dans l'alerte (doit être unique)
+#   url       adresse de la page
+#   selector  (optionnel) sélecteur CSS de la zone à surveiller ; sans lui, toute la page
+#   ignore    (optionnel) expressions régulières retirées du texte avant comparaison,
+#             pratique pour les dates, compteurs de vues, etc.
+#
+# Pour trouver un sélecteur : clic droit sur la zone > Inspecter, puis clic droit
+# sur l'élément HTML > Copier > Copier le sélecteur.
+# Mets toujours le sélecteur entre guillemets : sans eux, un « # » au début
+# serait lu comme un commentaire et le sélecteur serait ignoré.
+#
+# Enseignes testées le 25/10/2026 :
+#   lisibles  PlayStation Direct, Auchan, Boulanger, E.Leclerc
+#   bloquées  Micromania, Fnac, Darty, Carrefour, Cdiscount, Amazon, Cultura
+#             (protection anti-robot : utilise plutôt leur bouton « m'alerter »)
+#   absente   Electro Dépôt (ne vend pas la PS5 Pro)
+
+sites:
+  # Message « Actuellement en rupture de stock » remplacé par le bouton d'achat au réassort.
+  - name: PlayStation Direct — PS5 Pro
+    url: https://www.playstation.com/fr-fr/ps5/ps5-pro/buy-now/
+    selector: "div.type-body-roman-3"
+
+  # Bouton « Bientôt dispo ! » remplacé par « Ajouter au panier » au réassort.
+  - name: Auchan — PS5 Pro
+    url: https://www.auchan.fr/sony-console-playstation-5-pro/pr-C1824137
+    selector: ".productOfferSelector .offer-selector__add2cart-wrapper"
+
+  # Boulanger et Leclerc affichent en permanence des revendeurs à prix gonflé.
+  # On ignore prix, notes et dates : l'alerte part quand le VENDEUR ou le stock change
+  # (ex. « vendu & expédié par Boulanger » à la place d'un revendeur).
+  - name: Boulanger — PS5 Pro
+    url: https://www.boulanger.com/ref/1230556
+    selector: ".product-head__bottom"
+    ignore: &revendeurs
+      - '\d[\d\s ]*(,\d{2})?\s?€'  # prix
+      - '^(\d+|,)$'                     # prix découpé en morceaux (Leclerc)
+      - 'Prévue le \d{2}/\d{2}/\d{2}'   # dates de livraison
+      - '\d(\.\d+)?/5|\(\d+\)'          # notes des vendeurs
+      - '\d+ (neufs?|occasions?) dès'   # nombre d'offres partenaires
+
+  - name: E.Leclerc — PS5 Pro
+    url: https://www.e.leclerc/fp/console-playstation-5-pro-ps5-0711719595472
+    selector: "#product-buybox"
+    ignore: *revendeurs
+
+  - name: E.Leclerc — PS5 Pro édition 2 To
+    url: https://www.e.leclerc/fp/console-playstation-5-edition-pro-2tb-ps5-0711719024040
+    selector: "#product-buybox"
+    ignore: *revendeurs
+
+  - name: E.Leclerc — Pack PS5 Pro + lecteur Blu-ray
+    url: https://www.e.leclerc/fp/pack-ps5-pro-console-ps5-pro-lecteur-de-disques-blu-ray-ultra-hd-ps5-3701439604155
+    selector: "#product-buybox"
+    ignore: *revendeurs
+
+  # Micromania bloque les robots : le bot ne peut pas lire cette page.
+  # Inscris-toi plutôt à l'alerte « retour en stock » directement sur la fiche.
+  # - name: Micromania — PS5 Pro
+  #   url: https://www.micromania.fr/p/playstation-5-pro-144778.html
+  #   selector: ".back-in-stock-container"
